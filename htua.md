@@ -9,4 +9,6 @@ dotnet user-jwts create --name MyTestUser --scope "myapi:secrets"
 
 dotnet user-jwts create
 dotnet user-jwts print {ID} --show-all
+
+curl -i -H "Authorization: Bearer $TOKEN" http://localhost:5111/secret
 ```
