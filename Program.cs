@@ -1,4 +1,5 @@
 using diLifeTimes_.Models;
+using Keycloak.AuthServices.Authentication;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +12,9 @@ builder.Services.AddScoped<ITypeScoped, ClassScoped>();
 builder.Services.AddSingleton<ITypeSingleton, ClassSingleton>();
 // builder.Services.AddTransient<AppClass>();
 
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+// builder.Services.AddAuthorization();
+// builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+builder.Services.AddKeycloakAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
@@ -31,10 +33,14 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+/*
 app.MapGet("/secret", (ClaimsPrincipal user) => $"Hello {user.Identity?.Name}. My secret")
 .RequireAuthorization();
 app.MapGet("/secret2", () => "This is a different secret!")
     .RequireAuthorization(p => p.RequireClaim("scope", "myapi:secrets"));
+*/
+app.MapGet("/secret", (ClaimsPrincipal user) => $"Hello {user.Identity?.Name}. My secret")
+.RequireAuthorization();
 
 app.MapControllerRoute(
     name: "default",
