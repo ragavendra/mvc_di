@@ -1,4 +1,5 @@
 using diLifeTimes_.Models;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddTransient<ITypeTransient, ClassTransient>();
 builder.Services.AddScoped<ITypeScoped, ClassScoped>();
 builder.Services.AddSingleton<ITypeSingleton, ClassSingleton>();
 // builder.Services.AddTransient<AppClass>();
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication("Bearer").AddJwtBearer();
 
 var app = builder.Build();
 
@@ -26,6 +30,11 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.MapGet("/secret", (ClaimsPrincipal user) => $"Hello {user.Identity?.Name}. My secret")
+.RequireAuthorization();
+app.MapGet("/secret2", () => "This is a different secret!")
+    .RequireAuthorization(p => p.RequireClaim("scope", "myapi:secrets"));
 
 app.MapControllerRoute(
     name: "default",
