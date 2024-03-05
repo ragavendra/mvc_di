@@ -20,9 +20,10 @@ builder.Services.AddKeycloakAuthentication(builder.Configuration);
 builder.Services.AddAuthorization(o => o.AddPolicy("IsAdmin", b =>
 {
     b.RequireRealmRoles("admin");
-    b.RequireResourceRoles("r-admin"); // stands for "resource admin"
+    // b.RequireResourceRoles("r-admin"); // stands for "resource admin"
+
     // resource roles are mapped to ASP.NET Core Identity roles
-    b.RequireRole("r-admin");
+    // b.RequireRole("r-admin");
 }));
 builder.Services.AddKeycloakAuthorization(builder.Configuration);
 
