@@ -1,5 +1,6 @@
 using diLifeTimes_.Models;
 using Keycloak.AuthServices.Authentication;
+using Keycloak.AuthServices.Authorization;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,15 @@ builder.Services.AddSingleton<ITypeSingleton, ClassSingleton>();
 // builder.Services.AddAuthentication("Bearer").AddJwtBearer();
 builder.Services.AddKeycloakAuthentication(builder.Configuration);
 
+builder.Services.AddAuthorization(o => o.AddPolicy("IsAdmin", b =>
+{
+    b.RequireRealmRoles("admin");
+    b.RequireResourceRoles("r-admin"); // stands for "resource admin"
+    // resource roles are mapped to ASP.NET Core Identity roles
+    b.RequireRole("r-admin");
+}));
+builder.Services.AddKeycloakAuthorization(builder.Configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -31,6 +41,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 /*
@@ -40,7 +51,7 @@ app.MapGet("/secret2", () => "This is a different secret!")
     .RequireAuthorization(p => p.RequireClaim("scope", "myapi:secrets"));
 */
 app.MapGet("/secret", (ClaimsPrincipal user) => $"Hello {user.Identity?.Name}. My secret")
-.RequireAuthorization();
+.RequireAuthorization("IsAdmin");
 
 app.MapControllerRoute(
     name: "default",
